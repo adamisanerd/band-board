@@ -1,0 +1,1052 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Band Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#ece3cf; --surface:#f8f2e4; --ink:#1f1d1a; --muted:#6b6457; --line:#cdbf9f;
+  --accent:#9a6414; --yes:#3d7a4c; --maybe:#b27a1a; --no:#a3453a; --on-strong:#f8f2e4;
+  --display:"Barlow Condensed","Arial Narrow","Roboto Condensed",sans-serif;
+  --body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1d1c19; --surface:#28261f; --ink:#efe5cf; --muted:#a59c89; --line:#3d3a31;
+    --accent:#e2b35c; --yes:#5fa56f; --maybe:#e2b35c; --no:#d4705f; --on-strong:#1d1c19;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1d1c19; --surface:#28261f; --ink:#efe5cf; --muted:#a59c89; --line:#3d3a31;
+  --accent:#e2b35c; --yes:#5fa56f; --maybe:#e2b35c; --no:#d4705f; --on-strong:#1d1c19;
+}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--body);-webkit-font-smoothing:antialiased}
+.wrap{max-width:720px;margin:0 auto;padding:16px 16px 56px}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+a{color:var(--accent)}
+
+header{display:flex;align-items:center;gap:12px;padding:6px 0 14px}
+.shield{flex:none;width:46px;height:50px}
+.shield path{fill:var(--ink)}
+.shield text{fill:var(--bg);font:700 17px var(--display)}
+header h1{font:700 30px/1 var(--display);margin:0;letter-spacing:.01em}
+header .sub{color:var(--muted);font-size:14px}
+.me{margin-left:auto;text-align:right;font-size:13px;color:var(--muted)}
+.me select{display:block;margin-top:2px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:4px 6px;font-size:14px;color:var(--ink)}
+
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;gap:4px;padding:8px 0;border-bottom:2px solid var(--ink);margin-bottom:8px}
+nav button{flex:1;background:none;border:0;padding:8px 2px;font:600 18px var(--display);color:var(--muted);cursor:pointer;border-radius:8px}
+nav button[aria-current="true"]{color:var(--ink);background:var(--surface)}
+nav .count{font:500 14px var(--body);color:var(--accent);margin-left:4px}
+
+.notice{background:var(--surface);border-left:4px solid var(--accent);padding:10px 12px;margin:10px 0;border-radius:6px;font-size:15px}
+.empty{color:var(--muted);padding:24px 0;text-align:center}
+
+form.card,.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;margin:12px 0}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row>*{flex:1 1 140px;min-width:0}
+label{display:block;font-size:13px;color:var(--muted);margin-bottom:8px}
+label>input,label>select,label>textarea{display:block;width:100%;margin-top:3px}
+input,select,textarea{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 10px;max-width:100%}
+textarea{resize:vertical;min-height:120px;width:100%;display:block}
+a.link{display:inline-block}
+.btn{background:var(--ink);color:var(--on-strong);border:0;border-radius:999px;padding:10px 18px;font:600 16px var(--body);cursor:pointer}
+.btn.ghost{background:none;color:var(--ink);border:1px solid var(--line)}
+.btn.small{padding:6px 12px;font-size:14px}
+.btn:disabled{opacity:.5;cursor:default}
+.link{background:none;border:0;padding:4px 2px;color:var(--muted);font-size:14px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.link.warn{color:var(--no)}
+.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:6px}
+
+/* Availability */
+.date{display:grid;grid-template-columns:64px 1fr;gap:14px;padding:16px 2px;border-bottom:1px solid var(--line)}
+.day{text-align:center;line-height:1}
+.day .dow{font:600 15px var(--display);color:var(--muted)}
+.day .num{font:700 42px/1 var(--display)}
+.day .mon{font:600 15px var(--display);color:var(--muted)}
+.meta{font-size:15px}
+.meta b{font-weight:600}
+.tag{display:inline-block;font-size:12px;font-weight:600;padding:1px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin-left:6px;vertical-align:1px}
+.tag.best{border-color:var(--accent);color:var(--accent)}
+.tag.all{background:var(--yes);border-color:var(--yes);color:var(--on-strong)}
+.who-row{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.who{width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font:600 14px var(--display);border:2px solid var(--line);color:var(--muted)}
+.who.yes{background:var(--yes);border-color:var(--yes);color:var(--on-strong)}
+.who.maybe{border:2px dashed var(--maybe);color:var(--maybe)}
+.who.no{border-color:var(--no);color:var(--no);text-decoration:line-through}
+.vote{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.vote button{background:none;border:0;padding:7px 14px;cursor:pointer;font-weight:600;font-size:14px;color:var(--muted)}
+.vote button+button{border-left:1px solid var(--line)}
+.vote button[aria-pressed="true"][data-v="yes"]{background:var(--yes);color:var(--on-strong)}
+.vote button[aria-pressed="true"][data-v="maybe"]{background:var(--maybe);color:var(--on-strong)}
+.vote button[aria-pressed="true"][data-v="no"]{background:var(--no);color:var(--on-strong)}
+
+/* Gig pass: the laminate */
+.pass{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:22px 22px 12px 12px;padding:30px 18px 18px;margin:22px 0;overflow:hidden}
+.pass::before{content:"";position:absolute;top:11px;left:50%;width:46px;height:9px;transform:translateX(-50%);border-radius:5px;background:var(--bg);border:1px solid var(--line)}
+.strip{display:flex;justify-content:space-between;align-items:baseline;background:var(--ink);color:var(--on-strong);margin:0 -18px 14px;padding:8px 18px;font:600 17px var(--display)}
+.strip .when{font-weight:700}
+.venue{font:700 34px/1.05 var(--display);margin:0 0 10px}
+dl.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px 16px;margin:0 0 12px}
+dl.facts dt{font-size:13px;color:var(--muted)}
+dl.facts dd{margin:0;font-weight:600;overflow-wrap:anywhere}
+.notes{white-space:pre-wrap;font-size:15px;border-top:1px dashed var(--line);padding-top:10px;margin:10px 0}
+.pass h3,.card h3{font:600 19px var(--display);margin:16px 0 6px}
+.gear{display:grid;grid-template-columns:1fr auto auto;gap:6px 8px;align-items:center}
+.gear select{padding:6px 8px;font-size:14px}
+.add-gear{display:flex;gap:8px;margin-top:8px}
+.add-gear input{flex:1;min-width:0}
+.split{display:flex;flex-wrap:wrap;gap:6px}
+.split button{background:none;border:1px solid var(--line);border-radius:10px;padding:6px 10px;cursor:pointer;text-align:left;font-size:14px}
+.split button[aria-pressed="true"]{border-color:var(--yes);background:color-mix(in srgb,var(--yes) 15%,transparent)}
+.split small{display:block;color:var(--muted);font-size:12px}
+.total{font-size:14px;color:var(--muted);margin-bottom:8px}
+.pick{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line);font-size:15px;color:var(--ink);margin:0;cursor:pointer}
+.pick input{margin-top:3px;width:18px;height:18px;flex:none;accent-color:var(--ink)}
+.pick small{display:block;color:var(--muted);font-size:13px}
+.qs{margin:10px 0 0;padding-left:18px;font-size:15px;color:var(--muted)}
+.linkrow{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.linkrow a{font-size:14px;font-weight:600;text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:6px 12px;color:var(--ink);background:var(--bg)}
+.linkrow a:hover{border-color:var(--ink)}
+.payrow{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.payrow .full{grid-column:1/-1}
+.payrow .amt{color:var(--muted);margin-left:4px}
+.payrow small{color:var(--muted);font-size:13px}
+.pay-methods{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.pay-methods .radio{justify-content:center;text-align:center}
+.paid-btn{background:none;border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:14px;font-weight:600;cursor:pointer;color:var(--muted)}
+.paid-btn[aria-pressed="true"]{background:var(--yes);border-color:var(--yes);color:var(--on-strong)}
+.pass label select{display:block;width:100%;margin-top:3px}
+button.who{background:none;cursor:pointer;padding:0;font:600 14px var(--display)}
+.linkrow a.primary{background:var(--ink);color:var(--on-strong);border-color:var(--ink)}
+.paid-btn.nudge{border-color:var(--accent);color:var(--accent)}
+.setlist-row{display:grid;grid-template-columns:34px 1fr auto;gap:10px;align-items:start;padding:10px 0;border-top:1px solid var(--line)}
+.setlist-order{display:flex;flex-direction:column;gap:3px}
+.setlist-order button{padding:2px 7px}
+.setlist-row .num{color:var(--muted);font-variant-numeric:tabular-nums;margin-right:4px}
+ol.songs{margin:4px 0 0;padding-left:26px;font-size:15px}
+ol.songs li{padding:2px 0}
+ol.songs small{color:var(--muted);margin-left:6px}
+.add-song{border-top:1px dashed var(--line);margin-top:10px;padding-top:10px}
+.add-song .row>label:first-child{flex:3 1 140px}
+.add-song .row>label{flex:1 1 60px}
+label.radio{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:5px 12px;margin:0;color:var(--ink);font-size:14px;cursor:pointer}
+label.radio>input{display:inline-block;width:auto;margin:0;padding:0;flex:none;accent-color:var(--ink)}
+label.radio:has(input:checked){border-color:var(--ink);font-weight:600}
+details summary{margin:6px 0}
+.played{border-top:1px solid var(--line);padding:10px 2px;display:flex;justify-content:space-between;gap:10px;font-size:15px}
+.played span:last-child{color:var(--muted);white-space:nowrap}
+h2.section{font:600 20px var(--display);margin:26px 0 4px}
+
+.members li{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.members{list-style:none;margin:0;padding:0}
+.members small{color:var(--muted);margin-left:6px}
+.picker{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+@media (prefers-reduced-motion:no-preference){.who,.vote button,.split button{transition:background .15s,border-color .15s,color .15s}}
+@media (max-width:520px){
+  .payrow{grid-template-columns:1fr;gap:6px}
+  .payrow>.paid-btn,.payrow>.tag{justify-self:start;margin-left:0}
+  .pay-methods{grid-template-columns:1fr}
+  .pay-methods .radio{justify-content:flex-start;text-align:left}
+}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+
+let db = null, ai = null, aiCtl = null;
+const S = {
+  status: 'loading', band: null, dates: [], gigs: [], venues: [], setlists: [], legacySongs: [], loaded: {},
+  tab: 'dates', me: lsGet('bb-me'), readOnly: false, notice: '',
+  editingGig: null, editingVenue: null, editingMember: null, editingSetlist: null, editingSong: null, confirm: null, busy: false,
+  imp: { open: false, status: 'idle', res: null, sel: {}, err: '', files: [], progress: '' },
+  imgMax: 5, imgBlocked: false, imgTypes: 'image/png,image/jpeg,image/webp,image/gif', payPending: null,
+  drafts: { imp: { text: '' }, setup: { name: '', roster: '' }, date: { kind: 'Rehearsal' }, gig: {}, venue: {}, pay: {}, member: {}, gear: {}, setlist: {}, song: {} }
+};
+
+function lsGet(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }
+function lsSet(k,v){ try { localStorage.setItem(k,v); } catch(e){} }
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => 'm' + Math.random().toString(36).slice(2, 9);
+const todayStr = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); };
+function parts(s){
+  if(!s) return { dow:'', num:'', mon:'', short:'' };
+  const [y,m,d] = s.split('-').map(Number); const dt = new Date(y, m-1, d);
+  const dow = dt.toLocaleDateString('en-US',{weekday:'short'}), mon = dt.toLocaleDateString('en-US',{month:'short'});
+  return { dow, num: d, mon, short: `${dow} ${mon} ${d}` };
+}
+function fmtTime(t){ if(!t) return ''; const [h,m] = t.split(':').map(Number); return `${((h+11)%12)+1}:${String(m).padStart(2,'0')} ${h<12?'AM':'PM'}`; }
+const money = n => '$' + (Math.round(n*100)/100).toFixed(2).replace(/\.00$/,'');
+const members = () => (S.band && Array.isArray(S.band.members)) ? S.band.members : [];
+const memberName = id => (members().find(m => m.id === id) || {}).name || 'Someone';
+const initials = n => n.split(/\s+/).filter(Boolean).map(w => w[0]).slice(0,2).join('').toUpperCase();
+const draft = (f, k, dflt='') => (S.drafts[f] && S.drafts[f][k] !== undefined) ? S.drafts[f][k] : dflt;
+
+/* ---------- data ---------- */
+async function init(){
+  render();
+  if (!window.claude || typeof window.claude.use !== 'function') { S.status = 'nodb'; render(); return; }
+  const [d, u, sm] = await Promise.all([claude.use('db'), claude.use('user'), claude.use('sample')]);
+  db = d; ai = sm;
+  if (ai) { try { const caps = await ai.limits(); if (caps && caps.images) { S.imgMax = caps.images.maxCount || 5; if (Array.isArray(caps.images.mediaTypes)) S.imgTypes = caps.images.mediaTypes.join(','); } } catch(e){} }
+  if (!db) { S.status = 'nodb'; render(); return; }
+  if (u) { try { if (await u.can('data.write') === false) S.readOnly = true; } catch(e){} }
+  const onErr = e => { if (e && e.code === 'revoked') { S.status = 'nodb'; render(); } };
+  db.doc('band/main').onSnapshot(s => { S.band = s.exists ? s.data() : null; S.status = 'ready'; render(); }, onErr);
+  db.collection('dates').onSnapshot(s => { S.dates = s.docs.map(x => ({ id: x.id, ...x.data() })); render(); }, onErr);
+  db.collection('gigs').onSnapshot(s => { S.gigs = s.docs.map(x => ({ id: x.id, ...x.data() })); render(); }, onErr);
+  db.collection('venues').onSnapshot(s => { S.venues = s.docs.map(x => ({ id: x.id, ...x.data() })); render(); }, onErr);
+  db.collection('setlists').onSnapshot(s => { S.setlists = s.docs.map(x => ({ id: x.id, ...x.data() })); S.loaded.setlists = true; migrateSongs(); render(); }, onErr);
+  // Songs from the old single-list setlist (one doc per song) move into setlists/main.
+  db.collection('setlist').onSnapshot(s => { S.legacySongs = s.docs.map(x => ({ id: x.id, ...x.data() })).sort((a,b) => (a.position||0) - (b.position||0)); S.loaded.setlist = true; migrateSongs(); render(); }, onErr);
+}
+
+let migrating = false;
+async function migrateSongs(){
+  if (migrating || S.readOnly || !S.loaded.setlists || !S.loaded.setlist || !S.legacySongs.length) return;
+  migrating = true;
+  try {
+    const old = S.legacySongs, main = S.setlists.find(l => l.id === 'main');
+    const songs = old.map(x => ({ id: x.id, title: x.title || '', key: x.key || '', bpm: x.bpm || 0, notes: x.notes || '' }));
+    if (!main) await db.doc('setlists/main').set({ name: 'Setlist', gigId: '', songs, createdAt: Date.now() });
+    else await db.doc('setlists/main').update({ songs: [...(main.songs || []), ...songs.filter(x => !(main.songs || []).some(y => y.id === x.id))] });
+    for (const x of old) await db.doc('setlist/' + x.id).delete();
+  } catch(e) {} finally { migrating = false; }
+}
+
+async function write(fn){
+  if (S.readOnly || !db || S.busy) return false;
+  S.busy = true;
+  try { await fn(); S.notice = ''; return true; }
+  catch(e){
+    if (e && e.code === 'invalid_argument') { S.readOnly = true; S.notice = "You can see this board but can't change it yet. Ask the owner to share it with you as an Editor."; }
+    else if (e && e.code === 'quota_exceeded') S.notice = 'The board is full. Remove some old dates or gigs, then try again.';
+    else S.notice = "That didn't save. Check your connection and try again.";
+    return false;
+  } finally { S.busy = false; render(); }
+}
+
+/* ---------- views ---------- */
+function shield(){
+  const name = (S.band && S.band.name) || 'Band';
+  const num = name.match(/\d+/); const t = num ? num[0].slice(0,3) : name[0].toUpperCase();
+  return `<svg class="shield" viewBox="0 0 46 50" aria-hidden="true"><path d="M5 5 Q23 11 41 5 L43 15 Q46 35 23 48 Q0 35 3 15 Z"/><text x="23" y="30" text-anchor="middle">${esc(t)}</text></svg>`;
+}
+
+function headerView(){
+  const ms = members();
+  const pick = ms.length ? `<div class="me">You are<select data-act="set-me" aria-label="Who are you">
+      <option value="">Pick your name</option>${ms.map(m => `<option value="${esc(m.id)}" ${m.id===S.me?'selected':''}>${esc(m.name)}</option>`).join('')}</select></div>` : '';
+  return `<header>${shield()}<div><h1>${esc((S.band && S.band.name) || 'Band Board')}</h1><div class="sub">Dates, gigs, gear and pay</div></div>${pick}</header>`;
+}
+
+function navView(){
+  const t = todayStr();
+  const openDates = S.dates.filter(d => d.date >= t && !d.booked).length;
+  const nextGigs = S.gigs.filter(g => g.date >= t).length;
+  const tab = (id, label, n) => `<button data-act="tab" data-tab="${id}" aria-current="${S.tab===id}">${label}${n ? `<span class="count">${n}</span>` : ''}</button>`;
+  return `<nav>${tab('dates','Dates',openDates)}${tab('gigs','Gigs',nextGigs)}${tab('setlist','Setlist',0)}${tab('venues','Venues',0)}${tab('band','Band',0)}</nav>`;
+}
+
+function setupView(){
+  if (S.readOnly) return `<p class="empty">This board hasn't been set up yet. Once the band owner adds the lineup, it'll show up here.</p>`;
+  return `<form class="card" data-form="setup">
+    <label>Band name<input id="f-setup-name" data-draft="setup.name" value="${esc(draft('setup','name'))}" placeholder="The Late Shift" required></label>
+    <label>Lineup, one person per line: name, role<textarea id="f-setup-roster" data-draft="setup.roster" rows="7" placeholder="Sam Rivera, vocals&#10;Alex Chen, guitar&#10;Jordan Lee, bass&#10;Casey Park, drums">${esc(draft('setup','roster'))}</textarea></label>
+    <button class="btn" type="submit">Create band board</button>
+  </form>`;
+}
+
+function whoAreYou(){
+  if (!members().length || members().some(m => m.id === S.me)) return '';
+  return `<div class="card"><b>Who's on this phone?</b> Pick your name so your votes count as you.
+    <div class="picker">${members().map(m => `<button class="btn ghost small" data-act="pick-me" data-id="${esc(m.id)}">${esc(m.name)}</button>`).join('')}</div></div>`;
+}
+
+/* ---------- group-text import ---------- */
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/, TIME_RE = /^\d{2}:\d{2}$/;
+const IMP_EMPTY = () => ({ open: false, status: 'idle', res: null, sel: {}, err: '', files: [], progress: '' });
+function matchMember(n){
+  const q = String(n||'').trim().toLowerCase().replace(/^me$/, ''); if (!q) return null;
+  const ms = members(), first = q.split(/\s+/)[0];
+  const hit = ms.find(m => m.name.toLowerCase() === q)
+    || ms.find(m => m.name.toLowerCase().split(/\s+/)[0] === first)
+    || (first.length >= 2 ? ms.find(m => initials(m.name).toLowerCase() === q.replace(/[^a-z]/g, '')) : null);
+  return hit ? hit.id : null;
+}
+function cleanResult(r){
+  const t = todayStr(), out = { dates: [], gigs: [], questions: [], unknown: [] };
+  const unknown = new Set();
+  (Array.isArray(r && r.dates) ? r.dates : []).forEach(d => {
+    if (!d || !DATE_RE.test(d.date || '') || d.date < t) return;
+    const votes = {};
+    [['in','yes'],['maybe','maybe'],['out','no']].forEach(([k,v]) => (Array.isArray(d[k]) ? d[k] : []).forEach(n => {
+      const id = matchMember(n); if (id) votes[id] = v; else if (String(n||'').trim()) unknown.add(String(n).trim().slice(0,40));
+    }));
+    out.dates.push({ date: d.date, time: TIME_RE.test(d.time||'') ? d.time : '', kind: ['Rehearsal','Gig','Either'].includes(d.kind) ? d.kind : 'Rehearsal', note: String(d.note||'').slice(0,200), votes });
+  });
+  (Array.isArray(r && r.gigs) ? r.gigs : []).forEach(g => {
+    if (!g || !DATE_RE.test(g.date || '') || !String(g.venue||'').trim()) return;
+    out.gigs.push({ venue: String(g.venue).trim().slice(0,120), date: g.date, loadIn: TIME_RE.test(g.loadIn||'') ? g.loadIn : '', setTime: TIME_RE.test(g.setTime||'') ? g.setTime : '',
+      address: String(g.address||'').slice(0,200), contactName: String(g.contact||'').slice(0,120), phone: '', email: '', collector: '', venueId: '',
+      pay: Math.max(0, Number(g.pay)||0), expenses: 0, notes: String(g.notes||'').slice(0,500) });
+  });
+  out.questions = (Array.isArray(r && r.questions) ? r.questions : []).map(q => String(q).slice(0,200)).slice(0,6);
+  out.unknown = [...unknown].slice(0, 8);
+  return out;
+}
+function isDupDate(d){ return S.dates.some(x => x.date === d.date && (x.time||'') === d.time && x.kind === d.kind); }
+function isDupGig(g){ return S.gigs.some(x => x.date === g.date && String(x.venue||'').toLowerCase() === g.venue.toLowerCase()); }
+
+function importPrompt(textPart, sofar, batchInfo){
+  const now = new Date(), meName = memberName(S.me);
+  const roster = members().map(m => m.name + (m.role ? ` (${m.role})` : '')).join('; ');
+  return `You catch a band up on its group chat and pull out scheduling facts. Today is ${now.toLocaleDateString('en-US',{weekday:'long'})}, ${todayStr()}.
+Band: ${(S.band && S.band.name) || 'the band'}. Members: ${roster}.
+The person sharing this is ${meName}.
+
+${batchInfo}
+How to tell who said what in screenshots of iMessage, Android Messages, or WhatsApp:
+- Bubbles on the RIGHT (usually blue or green) are from ${meName}.
+- Bubbles on the LEFT are from others. The sender's name or first name appears in small text above the first bubble of a run, sometimes with a circle avatar showing initials beside the last bubble. Every bubble in the run belongs to that sender until a new name or avatar appears.
+- If a run's sender is cut off at the top of a screenshot, carry it over from the previous screenshot. If you truly can't tell, don't guess.
+- Nicknames and first names map to the member list. Reactions like "Loved" or a thumbs-up on a proposal count as that person being in.
+In pasted text, lines may look like "Name: message", or names may be missing. Only attribute a message when the sender is clear.
+
+Return ONLY a JSON object, no prose, in this shape:
+{"dates":[{"date":"YYYY-MM-DD","time":"HH:MM or empty","kind":"Rehearsal|Gig|Either","note":"short context","in":["member name"],"maybe":["member name"],"out":["member name"]}],
+ "gigs":[{"venue":"","date":"YYYY-MM-DD","loadIn":"HH:MM or empty","setTime":"HH:MM or empty","address":"","contact":"","pay":0,"notes":""}],
+ "questions":["unresolved things the band still needs to decide"]}
+
+Rules:
+- "dates" are proposed or possible dates that are not confirmed bookings. Put each person who answered into in, maybe, or out. If someone changed their answer later in the thread, use their latest answer.
+- "gigs" are shows that sound confirmed and have a venue.
+- Resolve relative dates ("Saturday", "next Friday", "the 10th") to the next matching date on or after today, unless the screenshot's own timestamps show the message is older; then resolve relative to when it was sent. Use 24-hour times. Assume evening for bare times like "7" or "8".
+- Only include future dates. Never invent venues, pay, or addresses; leave fields empty or 0 when not stated.
+- Keep notes and questions short, plain, and specific.
+${sofar ? `\nWhat you found in the earlier screenshots of this same thread (update it with the new ones and return the COMPLETE merged result, keeping everything still true):\n${JSON.stringify(sofar)}\n` : ''}
+${textPart ? `\nPasted messages are between the thread tags:\n<thread>\n${textPart}\n</thread>` : ''}`;
+}
+
+async function readThread(){
+  const text = (S.drafts.imp.text || '').trim().slice(0, 20000), files = S.imp.files;
+  if (!text && !files.length) { S.imp.err = 'Add screenshots or paste some messages first.'; render(); return; }
+  if (!members().some(m => m.id === S.me)) { S.imp.err = 'Pick your name at the top first, so your own messages count as you.'; render(); return; }
+  const per = Math.max(1, S.imgMax || 1);
+  const batches = []; for (let i = 0; i < files.length; i += per) batches.push(files.slice(i, i + per));
+  if (!batches.length) batches.push([]);
+  aiCtl = new AbortController();
+  S.imp.status = 'reading'; S.imp.err = ''; render();
+  let sofar = null;
+  try {
+    for (let b = 0; b < batches.length; b++) {
+      S.imp.progress = batches.length > 1 ? `Screenshots ${b*per + 1} to ${Math.min(files.length, (b+1)*per)} of ${files.length}` : ''; render();
+      const info = batches[b].length ? `Attached are screenshots ${b*per + 1} to ${b*per + batches[b].length} of ${files.length}, in order from oldest to newest.\n` : '';
+      const opts = { signal: aiCtl.signal, modelTier: 'default' };
+      if (batches[b].length) opts.images = batches[b];
+      sofar = await ai.json(importPrompt(b === batches.length - 1 ? text : '', sofar, info), opts);
+    }
+    const res = cleanResult(sofar), sel = {};
+    res.dates.forEach((d,i) => sel['d'+i] = !isDupDate(d));
+    res.gigs.forEach((g,i) => sel['g'+i] = !isDupGig(g));
+    S.imp = { ...S.imp, status: 'review', res, sel, progress: '' };
+  } catch(e) {
+    const code = e && e.code;
+    S.imp.status = 'idle'; S.imp.progress = '';
+    if (code === 'cancelled') {}
+    else if (['not_granted','sampling_disabled','not_declared','capability_disabled','capability_removed'].includes(code)) { ai = null; S.imp.open = false; S.notice = "Catching up from the group chat isn't available in this view."; }
+    else if (code === 'images_unavailable') { S.imgBlocked = true; S.imp.files = []; S.imp.err = "This version of the Claude app can't send screenshots from a page yet. Try the board in a web browser at claude.ai, or paste the messages for now."; }
+    else if (code === 'image_rejected') S.imp.err = 'One of those files could not be read. Use regular screenshots (PNG or JPEG).';
+    else if (code === 'rate_limited') S.imp.err = "You've hit the usage limit for now. Try again in a little while.";
+    else if (code === 'session_expired') S.imp.err = 'Sign in to claude.ai again, then try once more.';
+    else if (code === 'prompt_too_large') S.imp.err = 'That is too much at once. Use fewer screenshots or a shorter paste.';
+    else if (code === 'refused' || code === 'empty_completion') S.imp.err = "Couldn't pull anything out of that. Try screenshots of just the part about dates and shows.";
+    else S.imp.err = "Couldn't read the thread that time. Tap Catch me up to try again.";
+  }
+  aiCtl = null; render();
+}
+
+async function addImported(){
+  const { res, sel } = S.imp; if (!res) return;
+  const ds = res.dates.filter((_,i) => sel['d'+i]), gs = res.gigs.filter((_,i) => sel['g'+i]);
+  if (!ds.length && !gs.length) { S.imp.err = 'Check at least one item to add.'; render(); return; }
+  const ok = await write(async () => {
+    for (const d of ds) {
+      const dup = S.dates.find(x => x.date === d.date && (x.time||'') === d.time && x.kind === d.kind);
+      if (dup) await db.doc('dates/' + dup.id).update({ votes: d.votes });
+      else await db.collection('dates').add({ ...d, booked: false, createdAt: Date.now() });
+    }
+    for (const g of gs) await db.collection('gigs').add({ ...g, gear: [], paid: {}, createdAt: Date.now() });
+  });
+  if (ok) {
+    S.imp = IMP_EMPTY(); S.drafts.imp = { text: '' };
+    const bits = [];
+    if (ds.length) bits.push(ds.length + (ds.length === 1 ? ' date' : ' dates'));
+    if (gs.length) bits.push(gs.length + (gs.length === 1 ? ' gig' : ' gigs'));
+    S.notice = 'Added ' + bits.join(' and ') + '.';
+    render();
+  }
+}
+
+function importView(){
+  if (S.readOnly || !ai) return '';
+  const I = S.imp;
+  if (!I.open) return `<div class="actions" style="margin:12px 0 0"><button class="btn ghost" data-act="imp-open">Catch up from the group chat</button></div>`;
+  const err = I.err ? `<div class="notice" role="alert">${esc(I.err)}</div>` : '';
+  if (I.status === 'reading') return `<div class="card"><b>Reading the chat…</b><div class="total" style="margin-top:4px">${esc(I.progress || 'Working out who said what about which dates.')}</div>
+    <button class="link" data-act="imp-stop">Stop</button></div>`;
+  if (I.status === 'review') {
+    const { res, sel } = I, ms = members();
+    const label = v => v === 'yes' ? 'in' : v === 'no' ? 'out' : v === 'maybe' ? 'maybe' : 'no answer';
+    const dRows = res.dates.map((d,i) => {
+      const chips = ms.map(m => { const v = d.votes[m.id];
+        return `<button type="button" class="who ${v||''}" data-act="imp-vote" data-k="${i}" data-m="${esc(m.id)}" title="${esc(m.name)}: ${label(v)}. Tap to change." aria-label="${esc(m.name)}: ${label(v)}. Tap to change.">${esc(initials(m.name))}</button>`; }).join('');
+      return `<div class="pick"><input type="checkbox" id="imp-d${i}" data-act="imp-toggle" data-k="d${i}" ${sel['d'+i]?'checked':''}>
+        <div><label for="imp-d${i}" style="color:var(--ink);font-size:15px;margin:0"><b>${esc(parts(d.date).short)}</b>, ${esc(d.kind)}${d.time ? ' at ' + fmtTime(d.time) : ''}${isDupDate(d) ? ' <span class="tag">Updates the one on the board</span>' : ''}</label>
+        ${d.note ? `<small>${esc(d.note)}</small>` : ''}<div class="who-row" style="margin:6px 0 0">${chips}</div></div></div>`; }).join('');
+    const gRows = res.gigs.map((g,i) => `<label class="pick"><input type="checkbox" data-act="imp-toggle" data-k="g${i}" ${sel['g'+i]?'checked':''}>
+        <span><b>Gig at ${esc(g.venue)}</b>, ${esc(parts(g.date).short)}${g.setTime ? ', set at ' + fmtTime(g.setTime) : ''}${g.pay ? ', ' + money(g.pay) : ''}${isDupGig(g) ? ' <span class="tag">Already on the board</span>' : ''}
+        ${g.notes ? `<small>${esc(g.notes)}</small>` : ''}</span></label>`).join('');
+    const n = Object.values(sel).filter(Boolean).length;
+    const qs = res.questions.length ? `<div style="margin-top:12px"><b>Still up in the air</b><ul class="qs">${res.questions.map(q => `<li>${esc(q)}</li>`).join('')}</ul></div>` : '';
+    const unk = res.unknown.length ? `<div class="total" style="margin-top:10px">Also answered but not on your lineup: ${esc(res.unknown.join(', '))}. Add them in the Band tab if they're part of the band.</div>` : '';
+    const nothing = !res.dates.length && !res.gigs.length ? `<div class="total">No upcoming dates or shows in there.</div>` : '';
+    return `<div class="card"><b>Here's what the band said</b>
+      ${res.dates.length ? `<div class="total" style="margin-top:2px">Tap anyone's initials to fix their answer.</div>` : ''}${err}${nothing}${dRows}${gRows}${qs}${unk}
+      <div class="actions" style="margin-top:12px">${n ? `<button class="btn" data-act="imp-add" ${S.busy?'disabled':''}>Add ${n} to the board</button>` : ''}
+      <button class="link" data-act="imp-back">Start over</button><button class="link" data-act="imp-close">Close</button></div></div>`;
+  }
+  const canImg = !S.imgBlocked, nf = I.files.length;
+  return `<div class="card"><b>Catch up from the group chat</b>
+    ${canImg ? `<div class="total" style="margin-top:2px">Scroll through the thread and screenshot each screen, then add them all here in order. Names above the bubbles tell it who said what, and your own bubbles count as you.</div>
+    <div class="actions" style="margin:8px 0">
+      <label class="btn ghost small" style="margin:0;color:var(--ink)">${nf ? 'Add more screenshots' : 'Add screenshots'}<input type="file" accept="${esc(S.imgTypes)}" multiple data-act="imp-files" style="position:absolute;width:1px;height:1px;opacity:0"></label>
+      ${nf ? `<span class="total" style="margin:0">${nf} ${nf === 1 ? 'screenshot' : 'screenshots'}</span><button class="link" data-act="imp-clear">Clear</button>` : ''}
+    </div>
+    <details ${draft('imp','text') ? 'open' : ''}><summary class="total" style="cursor:pointer">Or paste messages instead</summary>` : `<div class="total" style="margin-top:2px">${S.imgBlocked ? "Screenshots can't be read inside the Claude app yet. " : ''}Paste messages with "Name:" in front so answers go to the right person. Or skip the copying: tap Text the band on any date and everyone votes here instead.</div>`}
+    <textarea id="f-imp-text" data-draft="imp.text" rows="6" placeholder="Sam: can everyone do Thursday at 7?&#10;Alex: I'm in&#10;Jordan: can't Thursday, Friday works">${esc(draft('imp','text'))}</textarea>
+    ${canImg ? '</details>' : ''}
+    ${err}
+    <div class="actions" style="margin-top:10px"><button class="btn" data-act="imp-read">Catch me up</button><button class="link" data-act="imp-close">Cancel</button></div></div>`;
+}
+
+function datesView(){
+  const t = todayStr(), ms = members();
+  const upcoming = S.dates.filter(d => d.date >= t && !d.booked).sort((a,b) => (a.date+(a.time||'')).localeCompare(b.date+(b.time||'')));
+  const yesCount = d => ms.filter(m => d.votes && d.votes[m.id] === 'yes').length;
+  let best = null;
+  upcoming.forEach(d => { const c = yesCount(d); if (c > 0 && (!best || c > yesCount(best))) best = d; });
+
+  const form = S.readOnly ? '' : `<form class="card" data-form="date">
+    <div class="row">
+      <label>Date<input type="date" id="f-date-date" data-draft="date.date" value="${esc(draft('date','date'))}" min="${t}" required></label>
+      <label>Time<input type="time" id="f-date-time" data-draft="date.time" value="${esc(draft('date','time'))}"></label>
+      <label>For<select id="f-date-kind" data-draft="date.kind">${['Rehearsal','Gig','Either'].map(k => `<option ${draft('date','kind')===k?'selected':''}>${k}</option>`).join('')}</select></label>
+    </div>
+    <label>Note<input id="f-date-note" data-draft="date.note" value="${esc(draft('date','note'))}" placeholder="Alex's garage, or the venue asking about us"></label>
+    <button class="btn" type="submit" ${S.busy?'disabled':''}>Propose date</button>
+  </form>`;
+
+  const list = upcoming.map(d => {
+    const p = parts(d.date), c = yesCount(d), all = ms.length && c === ms.length;
+    const mine = d.votes && d.votes[S.me];
+    const chips = ms.map(m => { const v = d.votes && d.votes[m.id]; return `<span class="who ${v||''}" title="${esc(m.name)}: ${v||'no answer'}">${esc(initials(m.name))}</span>`; }).join('');
+    const vote = (S.readOnly || !ms.some(m => m.id === S.me)) ? '' : `<div class="vote" role="group" aria-label="Can you make it?">
+      ${['yes','maybe','no'].map(v => `<button data-act="vote" data-id="${esc(d.id)}" data-v="${v}" aria-pressed="${mine===v}">${v==='yes'?'In':v==='maybe'?'Maybe':'Out'}</button>`).join('')}</div>`;
+    const removing = S.confirm === d.id;
+    const ask = `${d.kind === 'Gig' ? 'Gig' : d.kind === 'Either' ? 'Rehearsal or gig' : 'Rehearsal'} ${p.short}${d.time ? ' at ' + fmtTime(d.time) : ''}${d.note ? ' (' + d.note + ')' : ''}. ${withLink('Can you make it?', 'Tap In or Out here:')}`;
+    const tools = S.readOnly ? '' : `<div class="actions">
+      <a class="link" href="${esc(groupSms(ask))}" target="_blank" rel="noopener">Text the band</a>
+      <button class="link" data-act="book" data-id="${esc(d.id)}">Book as a gig</button>
+      <button class="link warn" data-act="del-date" data-id="${esc(d.id)}">${removing ? 'Tap again to remove' : 'Remove'}</button></div>`;
+    return `<article class="date">
+      <div class="day"><div class="dow">${p.dow}</div><div class="num">${p.num}</div><div class="mon">${p.mon}</div></div>
+      <div><div class="meta"><b>${esc(d.kind||'Rehearsal')}</b>${d.time ? ` at ${fmtTime(d.time)}` : ''}
+        ${all ? '<span class="tag all">Everyone\'s in</span>' : (best && best.id===d.id ? '<span class="tag best">Best so far</span>' : '')}</div>
+        ${d.note ? `<div class="meta" style="color:var(--muted)">${esc(d.note)}</div>` : ''}
+        <div class="who-row">${chips}</div>
+        <div class="meta" style="font-size:14px;color:var(--muted);margin-bottom:8px">${c} of ${ms.length} in</div>
+        ${vote}${tools}</div>
+    </article>`;
+  }).join('');
+
+  return importView() + form + (list || `<p class="empty">No dates on the table. Propose one and the band can vote.</p>`);
+}
+
+/* ---------- links: maps, contacts, payments ---------- */
+const enc = encodeURIComponent;
+const telNum = p => String(p||'').replace(/[^\d+]/g, '');
+const ext = (href, label, title) => `<a href="${esc(href)}" target="_blank" rel="noopener"${title ? ` title="${esc(title)}"` : ''}>${label}</a>`;
+function mapLinks(q){
+  if (!q) return '';
+  return `<div class="linkrow">${ext('https://maps.apple.com/?daddr=' + enc(q), 'Apple Maps')}${ext('https://www.google.com/maps/dir/?api=1&destination=' + enc(q), 'Google Maps')}${ext('https://waze.com/ul?q=' + enc(q) + '&navigate=yes', 'Waze')}</div>`;
+}
+function contactLinks(phone, email){
+  const t = telNum(phone), out = [];
+  if (t) { out.push(ext('tel:' + t, 'Call')); out.push(ext('sms:' + t, 'Text')); }
+  if (email) out.push(ext('mailto:' + String(email).trim(), 'Email'));
+  return out.length ? `<div class="linkrow">${out.join('')}</div>` : '';
+}
+// The board's own link, saved per band in the Band tab, so texts can point people back here.
+const boardUrl = () => (S.band && S.band.boardUrl) || '';
+const withLink = (msg, lead) => boardUrl() ? `${msg} ${lead} ${boardUrl()}`.trim() : msg;
+function groupSms(body){
+  const nums = members().filter(m => m.id !== S.me).map(m => telNum(m.phone)).filter(Boolean);
+  const ios = /iPhone|iPad|iPod/.test(navigator.userAgent || '');
+  if (!nums.length) return `sms:${ios ? '&' : '?'}body=${enc(body)}`;
+  return ios ? `sms:/open?addresses=${nums.join(',')}&body=${enc(body)}` : `sms:${nums.join(',')}?body=${enc(body)}`;
+}
+const venueByName = n => S.venues.find(v => v.name.toLowerCase() === String(n||'').trim().toLowerCase());
+const venueFor = g => (g.venueId && S.venues.find(v => v.id === g.venueId)) || venueByName(g.venue) || null;
+
+function gigForm(){
+  const f = k => esc(draft('gig', k));
+  const known = venueByName(draft('gig','venue'));
+  const ms = members();
+  return `<form class="card" data-form="gig">
+    <div class="row">
+      <label>Venue<input id="f-gig-venue" list="venue-list" data-draft="gig.venue" value="${f('venue')}" autocomplete="off" required></label>
+      <label>Date<input type="date" id="f-gig-date" data-draft="gig.date" value="${f('date')}" required></label>
+    </div>
+    <datalist id="venue-list">${S.venues.map(v => `<option value="${esc(v.name)}">`).join('')}</datalist>
+    ${known ? `<div class="total">Filled in from your saved venue. Changes here update it.</div>` : ''}
+    <div class="row">
+      <label>Load-in<input type="time" id="f-gig-loadIn" data-draft="gig.loadIn" value="${f('loadIn')}"></label>
+      <label>Set time<input type="time" id="f-gig-setTime" data-draft="gig.setTime" value="${f('setTime')}"></label>
+    </div>
+    <label>Address<input id="f-gig-address" data-draft="gig.address" value="${f('address')}" autocomplete="street-address"></label>
+    <div class="row">
+      <label>Venue contact<input id="f-gig-contactName" data-draft="gig.contactName" value="${f('contactName')}" placeholder="Booker or manager"></label>
+      <label>Phone<input type="tel" id="f-gig-phone" data-draft="gig.phone" value="${f('phone')}"></label>
+    </div>
+    <label>Email<input type="email" id="f-gig-email" data-draft="gig.email" value="${f('email')}"></label>
+    <div class="row">
+      <label>Pay ($)<input type="number" min="0" step="1" inputmode="decimal" id="f-gig-pay" data-draft="gig.pay" value="${f('pay')}"></label>
+      <label>Expenses ($)<input type="number" min="0" step="1" inputmode="decimal" id="f-gig-expenses" data-draft="gig.expenses" value="${f('expenses')}" placeholder="Gas, sound guy"></label>
+    </div>
+    <label>Who collects the money<select id="f-gig-collector" data-draft="gig.collector"><option value="">Not decided</option>${ms.map(m => `<option value="${esc(m.id)}" ${draft('gig','collector')===m.id?'selected':''}>${esc(m.name)}</option>`).join('')}</select></label>
+    <label>Notes<textarea id="f-gig-notes" data-draft="gig.notes" rows="3" style="min-height:70px" placeholder="Dress code, parking, set length">${f('notes')}</textarea></label>
+    ${known ? '' : `<label class="pick" style="border:0"><input type="checkbox" id="f-gig-saveVenue" data-act="gig-savevenue" ${draft('gig','saveVenue', true) ? 'checked' : ''}><span>Save this venue and contact for next time</span></label>`}
+    <div class="actions"><button class="btn" type="submit" ${S.busy?'disabled':''}>${S.editingGig==='new' ? 'Save gig' : 'Save changes'}</button>
+    <button class="link" type="button" data-act="cancel-gig">Cancel</button></div>
+  </form>`;
+}
+
+const PAY_NAMES = { venmo: 'Venmo', cashapp: 'Cash App', applecash: 'Apple Cash' };
+function payMethods(m){ return ['venmo','cashapp','applecash'].filter(k => k === 'venmo' ? m.venmo : k === 'cashapp' ? m.cashtag : m.phone); }
+function prefMethod(m){ const ok = payMethods(m); return ok.includes(m.pref) ? m.pref : (ok[0] || ''); }
+// A link that sends money TO member m.
+function sendLink(m, method, amount, note){
+  const amt = amount.toFixed(2);
+  if (method === 'venmo') return `https://venmo.com/?txn=pay&recipients=${enc(m.venmo)}&amount=${amt}&note=${enc(note)}`;
+  if (method === 'cashapp') return `https://cash.app/$${enc(m.cashtag)}/${amt}`;
+  if (method === 'applecash') return `sms:${telNum(m.phone)}?&body=${enc(note + ': ' + money(amount))}`;
+  return '';
+}
+// A link member `me` uses to ask the collector for their cut, through me's preferred method.
+function requestLink(me, col, amount, note){
+  const method = prefMethod(me), amt = amount.toFixed(2);
+  if (method === 'venmo' && col.venmo) return `https://venmo.com/?txn=charge&recipients=${enc(col.venmo)}&amount=${amt}&note=${enc(note)}`;
+  const first = col.name.split(' ')[0];
+  const how = method === 'venmo' ? `Venmo me: ${sendLink(me, 'venmo', amount, note)}`
+    : method === 'cashapp' ? `Cash App me: ${sendLink(me, 'cashapp', amount, note)}`
+    : method === 'applecash' ? 'Apple Cash to this number works.' : '';
+  const body = `Hey ${first}, my cut from ${note} is ${money(amount)}. ${how}`.trim();
+  const to = telNum(col.phone);
+  return `sms:${to}?&body=${enc(body)}`;
+}
+
+function paySection(g){
+  const ms = members(), pay = Number(g.pay)||0; if (!pay) return '';
+  const exp = Number(g.expenses)||0, net = Math.max(0, pay - exp), share = ms.length ? Math.floor(net / ms.length * 100) / 100 : 0;
+  const ro = S.readOnly, note = `${(S.band && S.band.name) || 'Band'} at ${g.venue}, ${parts(g.date).short}`;
+  const col = ms.find(m => m.id === g.collector);
+  const me = ms.find(m => m.id === S.me), mePaid = !!(me && g.paid && g.paid[me.id]);
+  let request = '';
+  if (me && !ro && !mePaid && !(col && col.id === me.id)) {
+    if (!col) request = `<div class="notice"><b>Your share is ${money(share)}.</b> Pick who collected the money below, then you can request your cut from them.</div>`;
+    else {
+      const first = esc(col.name.split(' ')[0]), viaVenmo = prefMethod(me) === 'venmo' && col.venmo;
+      request = `<div class="notice"><b>Your share is ${money(share)}.</b> ${esc(col.name)} is holding the money.
+        <div class="linkrow"><a class="primary" href="${esc(requestLink(me, col, share, note))}" target="_blank" rel="noopener">Request ${money(share)} from ${first}${viaVenmo ? ' on Venmo' : ' by text'}</a></div>
+        <div class="total" style="margin:0">${prefMethod(me) ? `Once it lands, tap Mark paid next to your name.` : `Add your pay info in the Band tab so ${first} can pay you in one tap.`}</div></div>`;
+    }
+  }
+  const rows = ms.map(m => {
+    const isCol = col && m.id === col.id, paid = !!(g.paid && g.paid[m.id]), isMe = m.id === S.me;
+    const pending = S.payPending === g.id + ':' + m.id;
+    const status = isCol ? `<span class="tag">Holding the cash</span>`
+      : `<button class="paid-btn${pending && !paid ? ' nudge' : ''}" ${ro?'disabled':''} data-act="paid" data-id="${esc(g.id)}" data-m="${esc(m.id)}" aria-pressed="${paid}">${paid ? 'Paid' : 'Mark paid'}</button>`;
+    let action = '';
+    if (!isCol && !paid) {
+      const pm = prefMethod(m);
+      if (!isMe && pm) {
+        const others = payMethods(m).filter(k => k !== pm).map(k => `<a href="${esc(sendLink(m, k, share, note))}" target="_blank" rel="noopener" data-act="pay-go" data-id="${esc(g.id)}" data-m="${esc(m.id)}">${PAY_NAMES[k]}</a>`).join('');
+        action = `<div class="linkrow"><a class="primary" href="${esc(sendLink(m, pm, share, note))}" target="_blank" rel="noopener" data-act="pay-go" data-id="${esc(g.id)}" data-m="${esc(m.id)}">Pay ${esc(m.name.split(' ')[0])} ${money(share)} with ${PAY_NAMES[pm]}</a>${others}</div>
+          ${pending ? `<small>Back from ${PAY_NAMES[pm]}? Tap Mark paid once it went through.</small>` : ''}`;
+      } else if (!isMe) action = `<small>${esc(m.name.split(' ')[0])} hasn't added pay info yet.</small>`;
+    }
+    return `<div class="payrow"><div><b>${esc(m.name)}</b> <span class="amt">${money(share)}</span></div>${status}
+      ${action ? `<div class="full">${action}</div>` : ''}</div>`;
+  }).join('');
+  return `<h3>Pay</h3><div class="total">${money(pay)}${exp ? ` minus ${money(exp)} expenses` : ''}, split ${ms.length} ways</div>
+    ${ro ? '' : `<label style="max-width:260px">Who collected the money<select data-act="gig-collector" data-id="${esc(g.id)}"><option value="">Not decided</option>${ms.map(m => `<option value="${esc(m.id)}" ${g.collector===m.id?'selected':''}>${esc(m.name)}</option>`).join('')}</select></label>`}
+    ${request}${rows}`;
+}
+
+function passView(g){
+  const p = parts(g.date), ms = members(), v = venueFor(g);
+  const address = g.address || (v && v.address) || '';
+  const cName = g.contactName || g.contact || (v && v.contactName) || '';
+  const cPhone = g.phone || (v && v.phone) || '', cEmail = g.email || (v && v.email) || '';
+  const gear = Array.isArray(g.gear) ? g.gear : [];
+  const ro = S.readOnly;
+  const facts = [['Load-in', fmtTime(g.loadIn)], ['Set', fmtTime(g.setTime)], ['Address', address], ['Contact', cName]]
+    .filter(x => x[1]).map(([k,val]) => `<div><dt>${k}</dt><dd>${esc(val)}</dd></div>`).join('');
+  const gearRows = gear.map((it, i) => `<span>${esc(it.item)}</span>
+      ${ro ? `<span>${esc(it.who ? memberName(it.who) : 'Nobody yet')}</span><span></span>` :
+      `<select data-act="gear-who" data-id="${esc(g.id)}" data-i="${i}" aria-label="Who's bringing ${esc(it.item)}">
+        <option value="">Nobody yet</option>${ms.map(m => `<option value="${esc(m.id)}" ${it.who===m.id?'selected':''}>${esc(m.name)}</option>`).join('')}</select>
+      <button class="link warn" data-act="gear-del" data-id="${esc(g.id)}" data-i="${i}" aria-label="Remove ${esc(it.item)}">✕</button>`}`).join('');
+  const addGear = ro ? '' : `<form class="add-gear" data-form="gear" data-id="${esc(g.id)}">
+      <input id="f-gear-${esc(g.id)}" data-draft="gear.${esc(g.id)}" value="${esc(draft('gear', g.id))}" placeholder="PA, extension cords, merch table">
+      <button class="btn ghost small" type="submit">Add</button></form>`;
+  const removing = S.confirm === g.id;
+  return `<article class="pass">
+    <div class="strip"><span>All access</span><span class="when">${p.short}</span></div>
+    <h2 class="venue">${esc(g.venue)}</h2>
+    ${facts ? `<dl class="facts">${facts}</dl>` : ''}
+    ${mapLinks(address || g.venue)}
+    ${contactLinks(cPhone, cEmail)}
+    ${g.notes ? `<div class="notes">${esc(g.notes)}</div>` : ''}
+    <h3>Who's bringing what</h3>
+    ${gear.length ? `<div class="gear">${gearRows}</div>` : `<div class="total">Nothing assigned yet.</div>`}
+    ${addGear}
+    ${gigSetlist(g)}
+    ${paySection(g)}
+    ${ro ? '' : `<div class="actions" style="margin-top:14px"><button class="btn ghost small" data-act="edit-gig" data-id="${esc(g.id)}">Edit</button>
+      <a class="link" href="${esc(groupSms(`Booked: ${g.venue}, ${p.short}${g.loadIn ? ', load-in ' + fmtTime(g.loadIn) : ''}${g.setTime ? ', set at ' + fmtTime(g.setTime) : ''}.${boardUrl() ? ' ' + withLink('', 'Gear, directions, and pay are here:') : ''}`))}" target="_blank" rel="noopener">Text the band</a>
+      <button class="link warn" data-act="del-gig" data-id="${esc(g.id)}">${removing ? 'Tap again to remove' : 'Remove gig'}</button></div>`}
+  </article>`;
+}
+
+function unpaidCount(g){
+  if (!(Number(g.pay)||0)) return 0;
+  return members().filter(m => m.id !== g.collector && !(g.paid && g.paid[m.id])).length;
+}
+
+function gigsView(){
+  const t = todayStr();
+  const up = S.gigs.filter(g => g.date >= t).sort((a,b) => a.date.localeCompare(b.date));
+  const past = S.gigs.filter(g => g.date < t).sort((a,b) => b.date.localeCompare(a.date));
+  let html = '';
+  if (S.editingGig) html += gigForm();
+  else if (!S.readOnly) html += `<div class="actions" style="margin:12px 0"><button class="btn" data-act="new-gig">Add a gig</button></div>`;
+  html += up.map(passView).join('') || (S.editingGig ? '' : `<p class="empty">No gigs booked. Add one, or book a date from the Dates tab once everyone's in.</p>`);
+  const owed = past.filter(g => unpaidCount(g));
+  if (owed.length) {
+    html += `<h2 class="section">Still settling up</h2>` + owed.map(g => `<article class="card">
+      <h2 class="venue" style="font-size:26px;margin-bottom:2px">${esc(g.venue)}</h2>
+      <div class="total">Played ${esc(parts(g.date).short)}</div>${paySection(g)}</article>`).join('');
+  }
+  if (past.length) {
+    html += `<h2 class="section">Played</h2>` + past.map(g => {
+      const n = unpaidCount(g);
+      return `<div class="played"><span>${esc(parts(g.date).short)}, ${esc(g.venue)}</span><span>${n ? `${n} not paid` : 'Settled'}</span></div>`;
+    }).join('');
+  }
+  return html;
+}
+
+function venueForm(){
+  const f = k => esc(draft('venue', k));
+  return `<form class="card" data-form="venue">
+    <label>Venue name<input id="f-venue-name" data-draft="venue.name" value="${f('name')}" required></label>
+    <label>Address<input id="f-venue-address" data-draft="venue.address" value="${f('address')}" autocomplete="street-address"></label>
+    <div class="row">
+      <label>Contact<input id="f-venue-contactName" data-draft="venue.contactName" value="${f('contactName')}" placeholder="Booker or manager"></label>
+      <label>Phone<input type="tel" id="f-venue-phone" data-draft="venue.phone" value="${f('phone')}"></label>
+    </div>
+    <label>Email<input type="email" id="f-venue-email" data-draft="venue.email" value="${f('email')}"></label>
+    <label>Notes<textarea id="f-venue-notes" data-draft="venue.notes" rows="3" style="min-height:70px" placeholder="Stage size, house PA, load-in door, typical pay">${f('notes')}</textarea></label>
+    <div class="actions"><button class="btn" type="submit" ${S.busy?'disabled':''}>${S.editingVenue==='new' ? 'Save venue' : 'Save changes'}</button>
+    <button class="link" type="button" data-act="cancel-venue">Cancel</button></div>
+  </form>`;
+}
+
+function venuesView(){
+  const ro = S.readOnly;
+  let html = S.editingVenue ? venueForm() : (ro ? '' : `<div class="actions" style="margin:12px 0"><button class="btn" data-act="new-venue">Add a venue</button></div>`);
+  const list = [...S.venues].sort((a,b) => a.name.localeCompare(b.name)).map(v => {
+    const played = S.gigs.filter(g => g.venueId === v.id || String(g.venue||'').toLowerCase() === v.name.toLowerCase()).sort((a,b) => b.date.localeCompare(a.date));
+    const t = todayStr(), last = played.find(g => g.date < t), next = [...played].reverse().find(g => g.date >= t);
+    const hist = [played.length ? `${played.length} ${played.length === 1 ? 'gig' : 'gigs'}` : 'No gigs yet', last ? `last played ${parts(last.date).short}` : '', next ? `next up ${parts(next.date).short}` : ''].filter(Boolean).join(', ');
+    return `<article class="card venue-card">
+      <h2 class="venue" style="font-size:26px;margin-bottom:2px">${esc(v.name)}</h2>
+      <div class="total">${esc(hist)}</div>
+      ${v.address ? `<div>${esc(v.address)}</div>` : ''}${mapLinks(v.address || v.name)}
+      ${v.contactName ? `<div style="margin-top:6px"><b>${esc(v.contactName)}</b>${v.phone ? ` <span class="total">${esc(v.phone)}</span>` : ''}</div>` : ''}
+      ${contactLinks(v.phone, v.email)}
+      ${v.notes ? `<div class="notes">${esc(v.notes)}</div>` : ''}
+      ${ro ? '' : `<div class="actions"><button class="btn ghost small" data-act="book-venue" data-id="${esc(v.id)}">Book a gig here</button>
+        <button class="link" data-act="edit-venue" data-id="${esc(v.id)}">Edit</button>
+        <button class="link warn" data-act="del-venue" data-id="${esc(v.id)}">${S.confirm===v.id ? 'Tap again to remove' : 'Remove'}</button></div>`}
+    </article>`;
+  }).join('');
+  return html + (list || (S.editingVenue ? '' : `<p class="empty">No venues saved yet. Venues you add to gigs show up here with their contacts.</p>`));
+}
+
+/* ---------- setlists ---------- */
+// Each setlist is one doc: { name, gigId, songs: [{ id, title, key, bpm, notes }] }, so reordering is a single write.
+function allSetlists(){
+  const lists = [...S.setlists];
+  if (S.legacySongs.length && !lists.some(l => l.id === 'main')) lists.push({ id: 'main', name: 'Setlist', gigId: '', songs: S.legacySongs, createdAt: 0 });
+  const t = todayStr(), gigDate = l => { const g = l.gigId && S.gigs.find(x => x.id === l.gigId); return g ? g.date : ''; };
+  // Upcoming gigs first (soonest on top), then unattached lists, then past gigs.
+  const rank = l => { const d = gigDate(l); return d ? (d >= t ? 0 : 2) : 1; };
+  return lists.sort((a,b) => rank(a) - rank(b) || (rank(a) === 0 ? gigDate(a).localeCompare(gigDate(b)) : rank(a) === 2 ? gigDate(b).localeCompare(gigDate(a)) : (b.createdAt||0) - (a.createdAt||0)));
+}
+const listSongs = l => Array.isArray(l.songs) ? l.songs : [];
+const gigLabel = g => `${g.venue}, ${parts(g.date).short}`;
+function listTitle(l){ const g = l.gigId && S.gigs.find(x => x.id === l.gigId); return l.name || (g ? g.venue : 'Setlist'); }
+const songMeta = s => [s.key && `Key ${s.key}`, s.bpm && `${s.bpm} BPM`].filter(Boolean).join(', ');
+
+function gigSetlist(g){
+  const l = allSetlists().find(x => x.gigId === g.id);
+  if (!l) return S.readOnly ? '' : `<h3>Setlist</h3><div class="actions" style="margin:0"><button class="btn ghost small" data-act="gig-setlist" data-id="${esc(g.id)}">Make a setlist for this gig</button></div>`;
+  const songs = listSongs(l);
+  return `<h3>Setlist</h3>${songs.length ? `<ol class="songs">${songs.map(s => `<li>${esc(s.title)}${s.key ? `<small>${esc(s.key)}</small>` : ''}</li>`).join('')}</ol>` : `<div class="total">No songs yet.</div>`}
+    <div class="actions" style="margin-top:4px"><button class="link" data-act="open-setlist" data-id="${esc(l.id)}">${S.readOnly ? 'See setlist' : 'Edit setlist'}</button></div>`;
+}
+
+function setlistForm(){
+  const f = k => esc(draft('setlist', k)), isNew = S.editingSetlist === 'new', t = todayStr();
+  const taken = new Set(S.setlists.filter(l => l.id !== S.editingSetlist).map(l => l.gigId).filter(Boolean));
+  const gigs = S.gigs.filter(g => (g.date >= t || g.id === draft('setlist','gigId')) && !taken.has(g.id)).sort((a,b) => a.date.localeCompare(b.date));
+  const others = allSetlists().filter(l => listSongs(l).length);
+  return `<form class="card" data-form="setlist">
+    <label>Name<input id="f-setlist-name" data-draft="setlist.name" value="${f('name')}" placeholder="Friday at the Blue Door, Acoustic set"></label>
+    <label>For gig<select id="f-setlist-gigId" data-draft="setlist.gigId"><option value="">No gig yet</option>${gigs.map(g => `<option value="${esc(g.id)}" ${draft('setlist','gigId')===g.id?'selected':''}>${esc(gigLabel(g))}</option>`).join('')}</select></label>
+    ${isNew && others.length ? `<label>Start from<select id="f-setlist-copy" data-draft="setlist.copy"><option value="">Blank list</option>${others.map(l => `<option value="${esc(l.id)}" ${draft('setlist','copy')===l.id?'selected':''}>Copy ${esc(listTitle(l))} (${listSongs(l).length} songs)</option>`).join('')}</select></label>` : ''}
+    <div class="actions"><button class="btn" type="submit" ${S.busy?'disabled':''}>${isNew ? 'Create setlist' : 'Save changes'}</button>
+    <button class="link" type="button" data-act="cancel-setlist">Cancel</button></div>
+  </form>`;
+}
+
+function songForm(l){
+  const k = l.id, f = n => esc(draft('song', k + '.' + n)), editing = S.editingSong && S.editingSong.list === k;
+  return `<form class="add-song" data-form="song" data-id="${esc(k)}">
+    <div class="row">
+      <label>Song<input id="f-song-title-${esc(k)}" data-draft="song.${esc(k)}.title" value="${f('title')}" placeholder="Wagon Wheel" required></label>
+      <label>Key<input id="f-song-key-${esc(k)}" data-draft="song.${esc(k)}.key" value="${f('key')}" placeholder="G"></label>
+      <label>BPM<input type="number" min="1" max="300" inputmode="numeric" id="f-song-bpm-${esc(k)}" data-draft="song.${esc(k)}.bpm" value="${f('bpm')}" placeholder="120"></label>
+    </div>
+    <label>Notes<input id="f-song-notes-${esc(k)}" data-draft="song.${esc(k)}.notes" value="${f('notes')}" placeholder="Capo 2, Sam sings lead, extended outro"></label>
+    <div class="actions" style="margin:0"><button class="btn small" type="submit" ${S.busy?'disabled':''}>${editing ? 'Save song' : 'Add song'}</button>
+    ${editing ? `<button class="link" type="button" data-act="cancel-song" data-id="${esc(k)}">Cancel</button>` : ''}</div>
+  </form>`;
+}
+
+function setlistCard(l){
+  const ro = S.readOnly, songs = listSongs(l), g = l.gigId && S.gigs.find(x => x.id === l.gigId);
+  const rows = songs.map((s, i) => `<div class="setlist-row">
+    ${ro ? '<div></div>' : `<div class="setlist-order"><button class="link" data-act="song-up" data-id="${esc(l.id)}" data-i="${i}" ${i === 0 ? 'disabled' : ''} aria-label="Move ${esc(s.title)} up">↑</button><button class="link" data-act="song-down" data-id="${esc(l.id)}" data-i="${i}" ${i === songs.length - 1 ? 'disabled' : ''} aria-label="Move ${esc(s.title)} down">↓</button></div>`}
+    <div><span class="num">${i + 1}.</span><b>${esc(s.title)}</b>${songMeta(s) ? ` <span class="total">${esc(songMeta(s))}</span>` : ''}${s.notes ? `<div class="total" style="margin:0">${esc(s.notes)}</div>` : ''}</div>
+    ${ro ? '' : `<div class="actions" style="margin:0"><button class="link" data-act="edit-song" data-id="${esc(l.id)}" data-i="${i}">Edit</button><button class="link warn" data-act="del-song" data-id="${esc(s.id)}" data-list="${esc(l.id)}">${S.confirm === s.id ? 'Tap again' : 'Remove'}</button></div>`}
+  </div>`).join('');
+  const text = `${listTitle(l)}${g ? ` (${gigLabel(g)})` : ''} setlist:\n${songs.map((s, i) => `${i + 1}. ${s.title}${s.key ? ` (${s.key})` : ''}`).join('\n')}${boardUrl() ? '\n' + boardUrl() : ''}`;
+  return `<article class="card">
+    <h2 class="venue" style="font-size:26px;margin-bottom:2px">${esc(listTitle(l))}</h2>
+    <div class="total">${g ? `For ${esc(gigLabel(g))}. ` : ''}${songs.length} ${songs.length === 1 ? 'song' : 'songs'}</div>
+    ${rows}
+    ${ro ? '' : songForm(l)}
+    ${ro ? '' : `<div class="actions" style="margin-top:12px">
+      ${songs.length ? `<a class="link" href="${esc(groupSms(text))}" target="_blank" rel="noopener">Text the band</a>` : ''}
+      <button class="link" data-act="edit-setlist" data-id="${esc(l.id)}">Rename or change gig</button>
+      <button class="link warn" data-act="del-setlist" data-id="${esc(l.id)}">${S.confirm === l.id ? 'Tap again to remove' : 'Remove setlist'}</button></div>`}
+  </article>`;
+}
+
+function setlistView(){
+  const ro = S.readOnly, lists = allSetlists();
+  const top = ro ? '' : (S.editingSetlist ? setlistForm() : `<div class="actions" style="margin:12px 0"><button class="btn" data-act="new-setlist">New setlist</button></div>`);
+  return top + (lists.map(setlistCard).join('') || (S.editingSetlist ? '' : `<p class="empty">No setlists yet. Make one for your next gig, then reuse it as a starting point for the one after.</p>`));
+}
+
+function payInfoForm(m){
+  const f = k => esc(draft('pay', k));
+  return `<form data-form="pay" data-id="${esc(m.id)}" style="padding:10px 0 4px;width:100%">
+    <div class="row">
+      <label>Venmo username<input id="f-pay-venmo" data-draft="pay.venmo" value="${f('venmo')}" placeholder="sam-rivera" autocapitalize="off"></label>
+      <label>Cash App $cashtag<input id="f-pay-cashtag" data-draft="pay.cashtag" value="${f('cashtag')}" placeholder="$samrivera" autocapitalize="off"></label>
+    </div>
+    <label>Phone for Apple Cash<input type="tel" id="f-pay-phone" data-draft="pay.phone" value="${f('phone')}" placeholder="The number tied to their iMessage"></label>
+    <fieldset style="border:0;padding:0;margin:4px 0 8px"><legend class="total" style="padding:0">Preferred way to get paid</legend>
+      <div class="linkrow pay-methods">${['venmo','cashapp','applecash'].map(k => `<label class="radio"><input type="radio" name="pref" value="${k}" data-draft="pay.pref" ${draft('pay','pref')===k?'checked':''}> ${PAY_NAMES[k]}</label>`).join('')}</div>
+    </fieldset>
+    <div class="total">Bandmates paying you go straight to this app with the amount filled in. Everyone on this board can see this info.</div>
+    <div class="actions"><button class="btn small" type="submit">Save pay info</button><button class="link" type="button" data-act="cancel-pay">Cancel</button></div>
+  </form>`;
+}
+
+function bandView(){
+  const ms = members(), ro = S.readOnly;
+  const handles = m => { const h = [m.venmo && `Venmo @${m.venmo}`, m.cashtag && `Cash App $${m.cashtag}`, m.phone && 'Apple Cash'].filter(Boolean).join(', '); const pm = prefMethod(m); return h ? h + (pm ? `. Prefers ${PAY_NAMES[pm]}` : '') : ''; };
+  return `<div class="card"><b>Lineup</b>
+    <ul class="members">${ms.map(m => `<li style="flex-wrap:wrap"><span>${esc(m.name)}${m.role ? `<small>${esc(m.role)}</small>` : ''}${m.id===S.me ? '<small>(you)</small>' : ''}
+        <small style="display:block;margin-left:0">${esc(handles(m) || 'No pay info')}</small></span>
+      ${ro ? '' : `<span><button class="link" data-act="edit-pay" data-id="${esc(m.id)}">Pay info</button>
+        <button class="link warn" data-act="del-member" data-id="${esc(m.id)}">${S.confirm===m.id ? 'Tap again to remove' : 'Remove'}</button></span>`}
+      ${S.editingMember === m.id ? payInfoForm(m) : ''}</li>`).join('')}</ul>
+    ${ro ? '' : `<form data-form="member" class="row" style="margin-top:12px;align-items:flex-end">
+      <label>Name<input id="f-member-name" data-draft="member.name" value="${esc(draft('member','name'))}" required></label>
+      <label>Role<input id="f-member-role" data-draft="member.role" value="${esc(draft('member','role'))}" placeholder="Keys, fiddle, sub drummer"></label>
+      <div style="flex:0 0 auto;margin-bottom:8px"><button class="btn small" type="submit">Add</button></div></form>`}
+  </div>
+  <div class="card"><b>Getting the band on here</b>
+    <p style="margin:6px 0 0;font-size:15px">Share this page with each bandmate and give them Editor access so they can vote, claim gear, and add their pay info. Each person picks their name once on their own phone.</p>
+    ${ro ? '' : `<form data-form="boardurl" class="row" style="margin-top:12px;align-items:flex-end">
+      <label>Board link, added to texts so the band can tap back here<input type="url" id="f-boardurl-url" data-draft="boardurl.url" value="${esc(draft('boardurl','url', boardUrl()))}" placeholder="Paste this page's share link"></label>
+      <div style="flex:0 0 auto;margin-bottom:8px"><button class="btn small" type="submit">Save</button></div></form>`}</div>`;
+}
+
+function render(){
+  const a = document.activeElement, fid = a && a.id, sel = a && typeof a.selectionStart === 'number' ? [a.selectionStart, a.selectionEnd] : null;
+  let body;
+  if (S.status === 'loading') body = `<p class="empty">Loading the board…</p>`;
+  else if (S.status === 'nodb') body = `<div class="notice">The shared board isn't available in this view. Open the page on claude.ai while signed in to see your band's dates and gigs.</div>`;
+  else if (!S.band) body = setupView();
+  else body = navView() + whoAreYou() + (S.tab === 'dates' ? datesView() : S.tab === 'gigs' ? gigsView() : S.tab === 'setlist' ? setlistView() : S.tab === 'venues' ? venuesView() : bandView());
+  const notice = S.notice ? `<div class="notice" role="status">${esc(S.notice)}</div>` : '';
+  document.getElementById('app').innerHTML = headerView() + notice + body;
+  if (fid) { const el = document.getElementById(fid); if (el) { el.focus(); if (sel) try { el.setSelectionRange(sel[0], sel[1]); } catch(e){} } }
+}
+
+/* ---------- events ---------- */
+function setDraft(k, v){ const i = k.indexOf('.'), f = k.slice(0, i); (S.drafts[f] = S.drafts[f] || {})[k.slice(i+1)] = v; }
+
+document.addEventListener('input', e => {
+  const k = e.target.dataset && e.target.dataset.draft; if (!k) return;
+  setDraft(k, e.target.value);
+  if (k === 'gig.venue') {
+    const v = venueByName(e.target.value), g = S.drafts.gig;
+    if (v) { let changed = false;
+      ['address','contactName','phone','email'].forEach(f => { if (!g[f] && v[f]) { g[f] = v[f]; changed = true; } });
+      render(); }
+  }
+});
+
+document.addEventListener('change', async e => {
+  const el = e.target, act = el.dataset && el.dataset.act;
+  if (el.dataset && el.dataset.draft) setDraft(el.dataset.draft, el.value);
+  if (act === 'set-me') { S.me = el.value || null; lsSet('bb-me', el.value); render(); }
+  if (act === 'gig-savevenue') { S.drafts.gig.saveVenue = el.checked; }
+  if (act === 'imp-files') {
+    const picked = Array.from(el.files || []).filter(f => /^image\//.test(f.type));
+    S.imp.files = [...S.imp.files, ...picked].slice(0, 40); S.imp.err = picked.length ? '' : 'Pick screenshot images.'; render();
+  }
+  if (act === 'gig-collector') await write(() => db.doc('gigs/' + el.dataset.id).update({ collector: el.value }));
+  if (act === 'gear-who') {
+    const g = S.gigs.find(x => x.id === el.dataset.id); if (!g) return;
+    const gear = (g.gear || []).map(x => ({ ...x })); gear[+el.dataset.i].who = el.value;
+    await write(() => db.doc('gigs/' + g.id).update({ gear }));
+  }
+});
+
+const trim = v => String(v || '').trim();
+const cleanVenmo = v => trim(v).replace(/^@/, '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 30);
+const cleanCashtag = v => trim(v).replace(/^\$/, '').replace(/[^A-Za-z0-9_]/g, '').slice(0, 20);
+const cleanPhone = v => trim(v).replace(/[^\d+()\-\s.]/g, '').slice(0, 24);
+
+document.addEventListener('submit', async e => {
+  const form = e.target.closest('form[data-form]'); if (!form) return;
+  e.preventDefault();
+  const kind = form.dataset.form, d = S.drafts[kind] || {};
+  if (kind === 'setup') {
+    const list = (d.roster || '').split('\n').map(l => { const [n, ...r] = l.split(','); return { id: uid(), name: (n||'').trim(), role: r.join(',').trim() }; }).filter(m => m.name);
+    if (!trim(d.name) || !list.length) { S.notice = 'Add a band name and at least one person.'; render(); return; }
+    await write(() => db.doc('band/main').set({ name: trim(d.name), members: list }));
+  }
+  if (kind === 'date') {
+    if (!d.date) { S.notice = 'Pick a date first.'; render(); return; }
+    const votes = members().some(m => m.id === S.me) ? { [S.me]: 'yes' } : {};
+    const ok = await write(() => db.collection('dates').add({ date: d.date, time: d.time || '', kind: d.kind || 'Rehearsal', note: trim(d.note), votes, booked: false, createdAt: Date.now() }));
+    if (ok) { S.drafts.date = { kind: d.kind || 'Rehearsal' }; render(); }
+  }
+  if (kind === 'gig') {
+    if (!trim(d.venue) || !d.date) { S.notice = 'A gig needs a venue and a date.'; render(); return; }
+    const fields = { venue: trim(d.venue), date: d.date, loadIn: d.loadIn||'', setTime: d.setTime||'', address: trim(d.address),
+      contactName: trim(d.contactName), phone: cleanPhone(d.phone), email: trim(d.email), collector: d.collector || '',
+      pay: Number(d.pay)||0, expenses: Number(d.expenses)||0, notes: trim(d.notes) };
+    const vinfo = { address: fields.address, contactName: fields.contactName, phone: fields.phone, email: fields.email };
+    const editing = S.editingGig, fromDate = d.fromDate, known = venueByName(fields.venue), saveNew = d.saveVenue !== false;
+    const ok = await write(async () => {
+      let venueId = known ? known.id : '';
+      if (known) {
+        const changes = {}; Object.entries(vinfo).forEach(([k,v]) => { if (v && v !== (known[k]||'')) changes[k] = v; });
+        if (Object.keys(changes).length) await db.doc('venues/' + known.id).update(changes);
+      } else if (saveNew) {
+        const ref = await db.collection('venues').add({ name: fields.venue, ...vinfo, notes: '', createdAt: Date.now() });
+        venueId = ref.id;
+      }
+      fields.venueId = venueId;
+      if (editing === 'new') {
+        await db.collection('gigs').add({ ...fields, gear: [], paid: {}, createdAt: Date.now() });
+        if (fromDate) await db.doc('dates/' + fromDate).update({ booked: true });
+      } else await db.doc('gigs/' + editing).update(fields);
+    });
+    if (ok) { S.editingGig = null; S.drafts.gig = {}; render(); }
+  }
+  if (kind === 'venue') {
+    if (!trim(d.name)) { S.notice = 'A venue needs a name.'; render(); return; }
+    const fields = { name: trim(d.name), address: trim(d.address), contactName: trim(d.contactName), phone: cleanPhone(d.phone), email: trim(d.email), notes: trim(d.notes) };
+    const dup = venueByName(fields.name);
+    if (S.editingVenue === 'new' && dup) { S.notice = `${dup.name} is already saved. Edit it instead.`; render(); return; }
+    const editing = S.editingVenue;
+    const ok = await write(() => editing === 'new' ? db.collection('venues').add({ ...fields, createdAt: Date.now() }) : db.doc('venues/' + editing).update(fields));
+    if (ok) { S.editingVenue = null; S.drafts.venue = {}; render(); }
+  }
+  if (kind === 'gear') {
+    const id = form.dataset.id, item = trim(S.drafts.gear[id]), g = S.gigs.find(x => x.id === id);
+    if (!item || !g) return;
+    const ok = await write(() => db.doc('gigs/' + id).update({ gear: [...(g.gear || []), { item, who: '' }] }));
+    if (ok) { S.drafts.gear[id] = ''; render(); }
+  }
+  if (kind === 'boardurl') {
+    const url = trim(d.url);
+    if (url && !/^https:\/\//i.test(url)) { S.notice = 'The board link should start with https://'; render(); return; }
+    const ok = await write(() => db.doc('band/main').update({ boardUrl: url.slice(0, 300) }));
+    if (ok) { S.drafts.boardurl = {}; S.notice = url ? 'Saved. Texts from the board now include this link.' : 'Removed the board link.'; render(); }
+  }
+  if (kind === 'member') {
+    if (!trim(d.name)) return;
+    const ok = await write(() => db.doc('band/main').update({ members: [...members(), { id: uid(), name: trim(d.name), role: trim(d.role) }] }));
+    if (ok) { S.drafts.member = {}; render(); }
+  }
+  if (kind === 'pay') {
+    const id = form.dataset.id;
+    const info = { venmo: cleanVenmo(d.venmo), cashtag: cleanCashtag(d.cashtag), phone: cleanPhone(d.phone), pref: d.pref || '' };
+    const have = payMethods(info);
+    if (!have.includes(info.pref)) {
+      if (info.pref) { S.notice = `Add your ${PAY_NAMES[info.pref]} info to make it your preferred way, or pick another.`; render(); return; }
+      info.pref = have[0] || '';
+    }
+    const ok = await write(() => db.doc('band/main').update({ members: members().map(m => m.id === id ? { ...m, ...info } : m) }));
+    if (ok) { S.editingMember = null; S.drafts.pay = {}; render(); }
+  }
+  if (kind === 'setlist') {
+    const g = d.gigId && S.gigs.find(x => x.id === d.gigId);
+    const fields = { name: trim(d.name) || (g ? g.venue : 'Setlist'), gigId: g ? g.id : '' };
+    const editing = S.editingSetlist, from = d.copy && allSetlists().find(l => l.id === d.copy);
+    const songs = from ? listSongs(from).map(s => ({ ...s, id: uid() })) : [];
+    const ok = await write(() => editing === 'new' ? db.collection('setlists').add({ ...fields, songs, createdAt: Date.now() }) : db.doc('setlists/' + editing).update(fields));
+    if (ok) { S.editingSetlist = null; S.drafts.setlist = {}; render(); }
+  }
+  if (kind === 'song') {
+    const id = form.dataset.id, l = allSetlists().find(x => x.id === id); if (!l) return;
+    const sd = n => S.drafts.song[id + '.' + n];
+    if (!trim(sd('title'))) { S.notice = 'A song needs a title.'; render(); return; }
+    const fields = { title: trim(sd('title')).slice(0, 120), key: trim(sd('key')).slice(0, 12), bpm: Math.min(300, Math.max(0, Math.round(Number(sd('bpm'))||0))), notes: trim(sd('notes')).slice(0, 200) };
+    const edit = S.editingSong && S.editingSong.list === id ? S.editingSong.id : null;
+    const songs = edit ? listSongs(l).map(s => s.id === edit ? { ...s, ...fields } : s) : [...listSongs(l), { id: uid(), ...fields }];
+    const ok = await write(() => db.doc('setlists/' + id).update({ songs }));
+    if (ok) { ['title','key','bpm','notes'].forEach(n => delete S.drafts.song[id + '.' + n]); if (edit) S.editingSong = null; render();
+      if (!edit) { const el = document.getElementById('f-song-title-' + id); if (el) el.focus(); } }
+  }
+});
+
+document.addEventListener('click', async e => {
+  const el = e.target.closest('[data-act]'); if (!el || el.tagName === 'SELECT') return;
+  const act = el.dataset.act, id = el.dataset.id;
+  if (act === 'gig-savevenue' || act === 'imp-files') return;
+  const armed = S.confirm === id; if (!['del-date','del-gig','del-member','del-venue','del-setlist','del-song'].includes(act)) S.confirm = null;
+  switch (act) {
+    case 'imp-open': S.imp.open = true; S.imp.err = ''; render(); break;
+    case 'imp-close': if (aiCtl) aiCtl.abort(); S.imp = IMP_EMPTY(); render(); break;
+    case 'imp-back': S.imp = { ...IMP_EMPTY(), open: true }; render(); break;
+    case 'imp-clear': S.imp.files = []; render(); break;
+    case 'imp-vote': { const d = S.imp.res && S.imp.res.dates[+el.dataset.k]; if (!d) return;
+      const order = [undefined, 'yes', 'maybe', 'no'], cur = order.indexOf(d.votes[el.dataset.m]);
+      const next = order[(cur + 1) % order.length]; if (next) d.votes[el.dataset.m] = next; else delete d.votes[el.dataset.m];
+      render(); break; }
+    case 'pay-go': { const key = id + ':' + el.dataset.m; setTimeout(() => { S.payPending = key; render(); }, 400); break; }
+    case 'imp-stop': if (aiCtl) aiCtl.abort(); break;
+    case 'imp-read': if (S.imp.status !== 'reading') readThread(); break;
+    case 'imp-toggle': S.imp.sel[el.dataset.k] = el.checked; S.imp.err = ''; render(); break;
+    case 'imp-add': await addImported(); break;
+    case 'tab': S.tab = el.dataset.tab; S.notice = ''; render(); break;
+    case 'pick-me': S.me = id; lsSet('bb-me', id); render(); break;
+    case 'vote': await write(() => db.doc('dates/' + id).update({ votes: { [S.me]: el.dataset.v } })); break;
+    case 'book': {
+      const d = S.dates.find(x => x.id === id); if (!d) return;
+      S.tab = 'gigs'; S.editingGig = 'new'; S.drafts.gig = { date: d.date, setTime: d.time || '', notes: d.note || '', fromDate: d.id };
+      render(); window.scrollTo(0, 0); break;
+    }
+    case 'del-date': if (armed) { S.confirm = null; await write(() => db.doc('dates/' + id).delete()); } else { S.confirm = id; render(); } break;
+    case 'new-gig': S.editingGig = 'new'; S.drafts.gig = {}; render(); break;
+    case 'edit-gig': { const g = S.gigs.find(x => x.id === id); if (!g) return;
+      S.editingGig = id; S.drafts.gig = { ...g, contactName: g.contactName || g.contact || '', pay: g.pay || '', expenses: g.expenses || '' }; render(); window.scrollTo(0, 0); break; }
+    case 'cancel-gig': S.editingGig = null; S.drafts.gig = {}; render(); break;
+    case 'del-gig': if (armed) { S.confirm = null; await write(() => db.doc('gigs/' + id).delete()); } else { S.confirm = id; render(); } break;
+    case 'gear-del': { const g = S.gigs.find(x => x.id === id); if (!g) return;
+      const gear = (g.gear || []).filter((_, i) => i !== +el.dataset.i);
+      await write(() => db.doc('gigs/' + id).update({ gear })); break; }
+    case 'paid': { const g = S.gigs.find(x => x.id === id); if (!g) return;
+      const m = el.dataset.m, now = !(g.paid && g.paid[m]);
+      await write(() => db.doc('gigs/' + id).update({ paid: { [m]: now } })); break; }
+    case 'new-venue': S.editingVenue = 'new'; S.drafts.venue = {}; render(); break;
+    case 'edit-venue': { const v = S.venues.find(x => x.id === id); if (!v) return;
+      S.editingVenue = id; S.drafts.venue = { ...v }; render(); window.scrollTo(0, 0); break; }
+    case 'cancel-venue': S.editingVenue = null; S.drafts.venue = {}; render(); break;
+    case 'del-venue': if (armed) { S.confirm = null; await write(() => db.doc('venues/' + id).delete()); } else { S.confirm = id; render(); } break;
+    case 'book-venue': { const v = S.venues.find(x => x.id === id); if (!v) return;
+      S.tab = 'gigs'; S.editingGig = 'new';
+      S.drafts.gig = { venue: v.name, address: v.address || '', contactName: v.contactName || '', phone: v.phone || '', email: v.email || '' };
+      render(); window.scrollTo(0, 0); break; }
+    case 'edit-pay': { const m = members().find(x => x.id === id); if (!m) return;
+      S.editingMember = S.editingMember === id ? null : id; S.drafts.pay = { venmo: m.venmo || '', cashtag: m.cashtag || '', phone: m.phone || '', pref: prefMethod(m) }; render(); break; }
+    case 'cancel-pay': S.editingMember = null; S.drafts.pay = {}; render(); break;
+    case 'new-setlist': S.editingSetlist = 'new'; S.drafts.setlist = {}; render(); window.scrollTo(0, 0); break;
+    case 'gig-setlist': { const g = S.gigs.find(x => x.id === id); if (!g) return;
+      S.tab = 'setlist'; S.editingSetlist = 'new'; S.drafts.setlist = { name: g.venue, gigId: g.id }; render(); window.scrollTo(0, 0); break; }
+    case 'open-setlist': S.tab = 'setlist'; S.notice = ''; render(); window.scrollTo(0, 0); break;
+    case 'edit-setlist': { const l = allSetlists().find(x => x.id === id); if (!l) return;
+      S.editingSetlist = id; S.drafts.setlist = { name: l.name || '', gigId: l.gigId || '' }; render(); window.scrollTo(0, 0); break; }
+    case 'cancel-setlist': S.editingSetlist = null; S.drafts.setlist = {}; render(); break;
+    case 'del-setlist': if (armed) { S.confirm = null; await write(() => db.doc('setlists/' + id).delete()); } else { S.confirm = id; render(); } break;
+    case 'song-up': case 'song-down': {
+      const l = allSetlists().find(x => x.id === id); if (!l) return;
+      const songs = [...listSongs(l)], i = +el.dataset.i, j = act === 'song-up' ? i - 1 : i + 1;
+      if (j < 0 || j >= songs.length) return;
+      [songs[i], songs[j]] = [songs[j], songs[i]];
+      await write(() => db.doc('setlists/' + id).update({ songs })); break;
+    }
+    case 'edit-song': { const l = allSetlists().find(x => x.id === id), s = l && listSongs(l)[+el.dataset.i]; if (!s) return;
+      S.editingSong = { list: id, id: s.id };
+      ['title','key','bpm','notes'].forEach(n => S.drafts.song[id + '.' + n] = s[n] ? String(s[n]) : '');
+      render(); const f = document.getElementById('f-song-title-' + id); if (f) { f.focus(); f.scrollIntoView({ block: 'center' }); } break; }
+    case 'cancel-song': S.editingSong = null; ['title','key','bpm','notes'].forEach(n => delete S.drafts.song[id + '.' + n]); render(); break;
+    case 'del-song': if (armed) { S.confirm = null;
+        const lid = el.dataset.list, l = allSetlists().find(x => x.id === lid); if (!l) return;
+        if (S.editingSong && S.editingSong.id === id) S.editingSong = null;
+        await write(() => db.doc('setlists/' + lid).update({ songs: listSongs(l).filter(s => s.id !== id) }));
+      } else { S.confirm = id; render(); } break;
+    case 'del-member': if (armed) { S.confirm = null;
+        await write(() => db.doc('band/main').update({ members: members().filter(m => m.id !== id) }));
+      } else { S.confirm = id; render(); } break;
+  }
+});
+
+init();
+</script>
+</body>
+</html>
